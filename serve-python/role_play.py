@@ -174,7 +174,7 @@ def set_role(role_name, custom_name="", custom_prompt="", custom_greeting=""):
     """设置角色"""
     global current_role, conversation_history
     
-    if role_name == "🎭 自定义角色":
+    if role_name == "自定义角色":
         if not custom_name or not custom_prompt:
             return "⚠️ 请填写角色名称和系统提示词", ""
         
@@ -184,7 +184,22 @@ def set_role(role_name, custom_name="", custom_prompt="", custom_greeting=""):
             "greeting": custom_greeting or f"你好！我是{custom_name}，很高兴见到你！"
         }
     else:
-        current_role = PRESET_ROLES[role_name].copy()
+        # 尝试直接查找，如果不存在则尝试添加emoji前缀
+        if role_name in PRESET_ROLES:
+            current_role = PRESET_ROLES[role_name].copy()
+        else:
+            # 尝试从所有预设角色中找到匹配的（通过去除emoji）
+            found = False
+            for preset_key, preset_value in PRESET_ROLES.items():
+                # 去除emoji后比较
+                preset_name_without_emoji = preset_value.get("name", "")
+                if preset_name_without_emoji == role_name:
+                    current_role = preset_value.copy()
+                    found = True
+                    break
+            
+            if not found:
+                return f"⚠️ 角色'{role_name}'不存在", ""
     
     # 重置对话历史
     conversation_history = []
