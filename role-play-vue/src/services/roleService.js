@@ -19,6 +19,18 @@ export const roleService = {
     } catch (error) {
       throw new Error(`Failed to fetch role: ${error.message}`)
     }
+  },
+
+  // 设置角色
+  async setRole(roleName) {
+    try {
+      const response = await apiClient.post('/roles/set', {
+        role_name: roleName
+      })
+      return response
+    } catch (error) {
+      throw new Error(`Failed to set role: ${error.message}`)
+    }
   }
 }
 

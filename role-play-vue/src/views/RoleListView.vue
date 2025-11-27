@@ -20,7 +20,6 @@
         v-for="role in roleStore.roles"
         :key="role.id"
         :role="role"
-        @chat="startChat"
       />
     </div>
   </div>
@@ -28,7 +27,6 @@
 
 <script>
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useRoleStore } from '@/stores/roleStore'
 import Navbar from '@/components/Navbar.vue'
 import RoleCard from '@/components/RoleCard.vue'
@@ -40,20 +38,14 @@ export default {
     RoleCard
   },
   setup() {
-    const router = useRouter()
     const roleStore = useRoleStore()
     
     onMounted(() => {
       roleStore.fetchRoles()
     })
     
-    const startChat = (roleId) => {
-      router.push(`/chat/${roleId}`)
-    }
-    
     return {
-      roleStore,
-      startChat
+      roleStore
     }
   }
 }

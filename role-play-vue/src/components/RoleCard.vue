@@ -1,5 +1,5 @@
 <template>
-  <div class="role-card" @click="$emit('select', role)">
+  <div class="role-card">
     <div class="role-header">
       <h3 class="role-name">{{ role.name }}</h3>
       <div class="role-id">#{{ role.id }}</div>
@@ -11,14 +11,22 @@
       <span class="personality-tag">{{ role.personality }}</span>
     </div>
     <div class="role-actions">
-      <button class="chat-button" @click.stop="$emit('chat', role.id)">
-        开始对话
+      <button 
+        class="chat-button" 
+        @click="handleSelectRole"
+        :disabled="isLoading"
+      >
+        {{ isLoading ? '设置中...' : '开始对话' }}
       </button>
     </div>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
+import { useRoleStore } from '@/stores/roleStore'
+import { useRouter } from 'vue-router'
+
 export default {
   name: 'RoleCard',
   props: {
@@ -27,7 +35,30 @@ export default {
       required: true
     }
   },
-  emits: ['select', 'chat']
+  setup(props) {
+    const roleStore = useRoleStore()
+    const router = useRouter()
+    const isLoading = ref(false)
+
+    const handleSelectRole = async () => {
+      try {
+        isLoading.value = true
+        // 设置角色
+        await roleStore.setRole(props.role.name)
+        // 设置成功后跳转到聊天页面
+        router.push(`/chat/${props.role.id}`)
+      } catch (error) {
+        console.error('Failed to select role:', error)
+      } finally {
+        isLoading.value = false
+      }
+    }
+
+    return {
+      handleSelectRole,
+      isLoading
+    }
+  }
 }
 </script>
 

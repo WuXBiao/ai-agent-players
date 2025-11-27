@@ -43,6 +43,22 @@ export const useRoleStore = defineStore('role', {
       } finally {
         this.loading = false
       }
+    },
+
+    async setRole(roleName) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await roleService.setRole(roleName)
+        this.currentRole = { name: roleName, ...response }
+        return response
+      } catch (error) {
+        this.error = error.message
+        console.error('Failed to set role:', error)
+        throw error
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

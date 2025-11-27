@@ -12,13 +12,13 @@
     </div>
     
     <!-- 加载状态 -->
-    <div class="loading-spinner" v-if="roleStore.loading || chatStore.loading">
+    <div class="loading-spinner" v-if="roleStore.loading">
       加载中...
     </div>
     
     <!-- 错误信息 -->
-    <div class="error-message" v-else-if="roleStore.error || chatStore.error">
-      {{ roleStore.error || chatStore.error }}
+    <div class="error-message" v-else-if="roleStore.error">
+      {{ roleStore.error }}
     </div>
     
     <!-- 聊天区域 -->
@@ -28,7 +28,7 @@
           v-for="message in chatStore.messages"
           :key="message.id"
           :message="message"
-          :is-user="message.role_id !== roleStore.currentRole.id"
+          :is-user="message.is_user"
         />
       </div>
       
@@ -89,8 +89,62 @@ export default {
     }, { deep: true })
     
     const sendMessage = async (content) => {
-      // 发送用户消息
-      await chatStore.sendMessage(props.roleId, content)
+      // 先添加用户消息到列表
+      const userMessage = {
+        id: Date.now(),
+        role_id: parseInt(props.roleId),
+        content: content,
+        timestamp: new Date().toLocaleString('zh-CN'),
+        is_user: true
+      }
+      chatStore.messages.push(userMessage)
+      
+      // 添加加载中的 AI 消息占位符
+      const loadingMessage = {
+        id: Date.now() + 1,
+        role_id: parseInt(props.roleId),
+        content: '思考中...',
+        timestamp: new Date().toLocaleString('zh-CN'),
+        is_user: false,
+        loading: true
+      }
+      chatStore.messages.push(loadingMessage)
+      
+      // 异步发送消息获取 AI 回复（不等待）
+      try {
+        const response = await chatStore.sendMessage(props.roleId, content)
+        // 替换加载中的消息
+        const index = chatStore.messages.findIndex(msg => msg.id === loadingMessage.id)
+        if (index !== -1) {
+          // 如果 response 已经被添加到列表中，则删除加载消息
+          // 否则替换加载消息
+          if (response?.id && chatStore.messages.some(msg => msg.id === response.id)) {
+            // 删除加载消息
+            chatStore.messages.splice(index, 1)
+          } else {
+            // 替换加载消息
+            chatStore.messages[index] = {
+              id: loadingMessage.id,
+              role_id: parseInt(props.roleId),
+              content: response?.content || '抱歉，暂时无法回复',
+              timestamp: new Date().toLocaleString('zh-CN'),
+              is_user: false
+            }
+          }
+        }
+      } catch (error) {
+        // 错误时替换为错误消息
+        const index = chatStore.messages.findIndex(msg => msg.id === loadingMessage.id)
+        if (index !== -1) {
+          chatStore.messages[index] = {
+            id: loadingMessage.id,
+            role_id: parseInt(props.roleId),
+            content: '抱歉，发生了错误，请重试',
+            timestamp: new Date().toLocaleString('zh-CN'),
+            is_user: false
+          }
+        }
+      }
     }
     
     const goBack = () => {
