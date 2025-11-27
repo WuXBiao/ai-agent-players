@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="nav-brand">
-      <h2>AI角色扮演</h2>
+      <h2>AI虚拟角色</h2>
     </div>
     <ul class="nav-menu">
       <li class="nav-item">
@@ -22,10 +22,10 @@ export default {
 
 <style scoped>
 .navbar {
-  background-color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem 2rem;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+  padding: 1.2rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -35,34 +35,43 @@ export default {
 }
 
 .nav-brand h2 {
-  color: #667eea;
-  font-weight: 700;
+  color: white;
+  font-weight: 900;
+  font-size: 1.5rem;
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .nav-menu {
   display: flex;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-item {
-  margin-left: 2rem;
+  margin-left: 2.5rem;
 }
 
 .nav-link {
   text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  transition: color 0.3s ease;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
 }
 
 .nav-link:hover {
-  color: #667eea;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .nav-link.active {
-  background-color: #667eea;
+  background-color: rgba(255, 255, 255, 0.25);
   color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 </style>

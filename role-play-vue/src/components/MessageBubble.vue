@@ -31,8 +31,9 @@ export default {
 <style scoped>
 .message-bubble {
   display: flex;
-  margin-bottom: 1.5rem;
-  max-width: 75%;
+  margin-bottom: 0.8rem;
+  max-width: 80%;
+  animation: scaleIn 0.3s ease-out;
 }
 
 .message-bubble:not(.user-message) {
@@ -47,9 +48,9 @@ export default {
 }
 
 .message-content {
-  padding: 1rem 1.5rem;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   word-wrap: break-word;
   word-break: break-word;
@@ -58,19 +59,21 @@ export default {
 .message-bubble:not(.user-message) .message-content {
   background: #f0f0f0;
   color: #333;
-  border-bottom-left-radius: 4px;
+  border: none;
+  border-bottom-left-radius: 2px;
 }
 
 .user-message .message-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-bottom-right-radius: 4px;
+  background: #e5e7eb;
+  color: #333;
+  border: none;
+  border-bottom-right-radius: 2px;
 }
 
 .message-content p {
-  margin: 0 0 0.5rem 0;
-  line-height: 1.6;
-  font-size: 0.95rem;
+  margin: 0 0 0.2rem 0;
+  line-height: 1.4;
+  font-size: 0.85rem;
 }
 
 .message-content p:last-child {
@@ -78,33 +81,34 @@ export default {
 }
 
 .message-timestamp {
-  font-size: 0.75rem;
-  opacity: 0.7;
+  font-size: 0.65rem;
+  opacity: 0.6;
   text-align: right;
-  margin-top: 0.3rem;
+  margin-top: 0.2rem;
+  color: rgba(102, 126, 234, 0.6);
 }
 
 .user-message .message-timestamp {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(0, 212, 255, 0.5);
 }
 
 .message-bubble:not(.user-message) .message-timestamp {
-  color: #999;
+  color: rgba(102, 126, 234, 0.6);
 }
 
 /* 加载动画样式 */
 .loading-text {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.2rem;
   margin: 0 !important;
 }
 
 .dot {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: #999;
+  background: #00d4ff;
   animation: bounce 1.4s infinite ease-in-out both;
 }
 

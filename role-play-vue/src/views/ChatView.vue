@@ -1,41 +1,82 @@
 <template>
-  <div class="chat-container">
-    <Navbar />
-    
-    <!-- 角色信息头部 -->
-    <div class="chat-header" v-if="roleStore.currentRole">
-      <div class="role-info">
-        <h2>{{ roleStore.currentRole.name }}</h2>
-        <p>{{ roleStore.currentRole.description }}</p>
-      </div>
-      <button class="back-button" @click="goBack">返回角色列表</button>
-    </div>
-    
-    <!-- 加载状态 -->
-    <div class="loading-spinner" v-if="roleStore.loading">
-      加载中...
-    </div>
-    
-    <!-- 错误信息 -->
-    <div class="error-message" v-else-if="roleStore.error">
-      {{ roleStore.error }}
-    </div>
-    
-    <!-- 聊天区域 -->
-    <div class="chat-area" v-else-if="roleStore.currentRole">
-      <div class="messages-container" ref="messagesContainer">
-        <MessageBubble
-          v-for="message in chatStore.messages"
-          :key="message.id"
-          :message="message"
-          :is-user="message.is_user"
-        />
+  <div class="chat-layout">
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <button class="new-chat-btn" @click="startNewChat">
+          <span class="icon">↻</span>
+          重置对话
+        </button>
       </div>
       
-      <ChatInput
-        @send="sendMessage"
-        :loading="chatStore.loading"
-      />
+      <div class="sidebar-content">
+        <div class="chat-history">
+          <div class="history-item active">
+            <span class="history-title">{{ roleStore.currentRole?.name || '聊天' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-footer">
+        <button class="sidebar-btn" @click="goBack">
+          <span class="icon">←</span>
+          返回角色列表
+        </button>
+      </div>
+    </aside>
+    
+    <!-- 主聊天区域 -->
+    <div class="main-container">
+      <!-- 顶部导航 -->
+      <header class="top-header" v-if="roleStore.currentRole">
+        <div class="header-content">
+          <h1 class="role-name">{{ roleStore.currentRole.name }}</h1>
+          <p class="role-desc">{{ roleStore.currentRole.description }}</p>
+        </div>
+        <div class="header-actions">
+          <button class="action-btn">⋯</button>
+        </div>
+      </header>
+      
+      <!-- 聊天消息区域 -->
+      <div class="chat-main" ref="messagesContainer">
+        <!-- 加载状态 -->
+        <div class="loading-state" v-if="roleStore.loading">
+          <div class="spinner"></div>
+          <p>加载中...</p>
+        </div>
+        
+        <!-- 错误信息 -->
+        <div class="error-state" v-else-if="roleStore.error">
+          <p>{{ roleStore.error }}</p>
+        </div>
+        
+        <!-- 空状态 -->
+        <div class="empty-state" v-else-if="chatStore.messages.length === 0">
+          <div class="empty-icon">💬</div>
+          <p class="empty-text">开始与 {{ roleStore.currentRole?.name }} 对话</p>
+          <p class="empty-hint">{{ roleStore.currentRole?.description }}</p>
+        </div>
+        
+        <!-- 消息列表 -->
+        <div class="messages-list" v-else>
+          <MessageBubble
+            v-for="message in chatStore.messages"
+            :key="message.id"
+            :message="message"
+            :is-user="message.is_user"
+          />
+        </div>
+      </div>
+      
+      <!-- 底部输入区域 -->
+      <div class="chat-footer">
+        <ChatInput
+          @send="sendMessage"
+          :loading="chatStore.loading"
+        />
+        <p class="footer-hint">{{ roleStore.currentRole?.name }} 可能会犯错。请核实重要信息。</p>
+      </div>
     </div>
   </div>
 </template>
@@ -69,6 +110,18 @@ export default {
     const chatStore = useChatStore()
     const messagesContainer = ref(null)
     
+    // 滚动到底部的函数
+    const scrollToBottom = () => {
+      nextTick(() => {
+        if (messagesContainer.value) {
+          const container = messagesContainer.value
+          setTimeout(() => {
+            container.scrollTop = container.scrollHeight
+          }, 0)
+        }
+      })
+    }
+    
     onMounted(async () => {
       // 获取角色信息
       await roleStore.fetchRoleById(props.roleId)
@@ -76,16 +129,14 @@ export default {
       // 获取聊天历史
       if (roleStore.currentRole) {
         await chatStore.fetchChatHistory(props.roleId)
+        // 初始化时滚动到底部
+        scrollToBottom()
       }
     })
     
     // 监听消息变化，自动滚动到底部
     watch(() => chatStore.messages, () => {
-      nextTick(() => {
-        if (messagesContainer.value) {
-          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-        }
-      })
+      scrollToBottom()
     }, { deep: true })
     
     const sendMessage = async (content) => {
@@ -151,108 +202,264 @@ export default {
       router.push('/roles')
     }
     
+    const startNewChat = () => {
+      chatStore.messages = []
+    }
+    
     return {
       roleStore,
       chatStore,
       messagesContainer,
       sendMessage,
-      goBack
+      goBack,
+      startNewChat
     }
   }
 }
 </script>
 
 <style scoped>
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #f0f2f5;
-}
+  .chat-layout {
+    display: flex;
+    height: 100vh;
+    background: white;
+  }
 
-.chat-header {
-  background: white;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
+  /* 左侧边栏 */
+  .sidebar {
+    width: 260px;
+    background: #fff;
+    border-right: 1px solid #e5e5e5;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem 0;
+  }
 
-.role-info h2 {
-  margin: 0 0 0.5rem 0;
-  color: #333;
-  font-size: 1.5rem;
-}
+  .sidebar-header {
+    padding: 0 1rem 1rem;
+  }
 
-.role-info p {
-  margin: 0;
-  color: #666;
-  font-size: 1rem;
-}
+  .new-chat-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 
-.back-button {
-  background: #f0f2f5;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.3s ease;
-}
+  .new-chat-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
 
-.back-button:hover {
-  background: #e4e6e9;
-}
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0.5rem;
+  }
 
-.loading-spinner {
-  text-align: center;
-  font-size: 1.2rem;
-  padding: 2rem;
-  color: #667eea;
-}
+  .chat-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
-.error-message {
-  text-align: center;
-  font-size: 1.2rem;
-  padding: 2rem;
-  color: #e74c3c;
-  background-color: #fdf2f2;
-  border-radius: 10px;
-  border: 1px solid #f5c6cb;
-  margin: 1rem;
-}
+  .history-item {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #666;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+  .history-item:hover {
+    background: #f3f4f6;
+  }
 
-.messages-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem 2rem;
-  display: flex;
-  flex-direction: column;
-}
+  .history-item.active {
+    background: #e5e7eb;
+    color: #333;
+    font-weight: 600;
+  }
 
-.messages-container::-webkit-scrollbar {
-  width: 6px;
-}
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid #e5e5e5;
+  }
 
-.messages-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
+  .sidebar-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 
-.messages-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
+  .sidebar-btn:hover {
+    background: #f3f4f6;
+  }
 
-.messages-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
+  /* 主容器 */
+  .main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+  }
+
+  /* 顶部导航 */
+  .top-header {
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+  }
+
+  .header-content {
+    flex: 1;
+  }
+
+  .role-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .role-desc {
+    margin: 0.3rem 0 0;
+    font-size: 0.85rem;
+    color: #999;
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s ease;
+    padding: 0.5rem;
+  }
+
+  .action-btn:hover {
+    color: #333;
+  }
+
+  /* 聊天主区域 */
+  .chat-main {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem;
+    width: 100%;
+  }
+
+  .chat-main::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .chat-main::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-main::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+
+  .chat-main::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .loading-state,
+  .error-state,
+  .empty-state {
+    text-align: center;
+    color: #666;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e5e5;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-hint {
+    font-size: 0.9rem;
+    color: #999;
+  }
+
+  .messages-list {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* 底部输入区域 */
+  .chat-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e5e5e5;
+    background: white;
+  }
+
+  .footer-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 0.75rem;
+  }
 </style>

@@ -63,83 +63,139 @@ export default {
 </script>
 
 <style scoped>
+@keyframes borderGlow {
+  0%, 100% { box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.1), 0 0 10px rgba(0, 212, 255, 0.1); }
+  50% { box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.2), 0 0 20px rgba(0, 212, 255, 0.2); }
+}
+
 .role-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 15px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 0;
+  padding: 1.2rem;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+  animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 .role-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #00d4ff;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), inset 0 0 20px rgba(0, 212, 255, 0.05);
+  transform: translateY(-3px);
 }
 
 .role-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
 }
 
 .role-name {
-  color: #333;
-  font-size: 1.4rem;
-  font-weight: 700;
+  color: #00d4ff;
+  font-size: 1.3rem;
+  font-weight: 800;
   margin: 0;
+  letter-spacing: 1px;
 }
 
 .role-id {
-  background-color: #667eea;
-  color: white;
-  padding: 0.2rem 0.6rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  background: transparent;
+  color: #00d4ff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 35px;
+  text-align: center;
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  letter-spacing: 1px;
 }
 
 .role-description p {
-  color: #666;
-  font-size: 1rem;
+  color: rgba(102, 126, 234, 0.8);
+  font-size: 0.85rem;
   line-height: 1.5;
   margin: 0 0 1rem 0;
+  font-weight: 400;
 }
 
 .role-personality {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .personality-tag {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  background: transparent;
+  color: #00d4ff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .role-actions {
-  text-align: right;
+  text-align: center;
 }
 
 .chat-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
+  background: transparent;
+  color: #00d4ff;
+  border: 1px solid #00d4ff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 100%;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
 }
 
-.chat-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+.chat-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 212, 255, 0.1);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.chat-button:hover:not(:disabled) {
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.4), inset 0 0 15px rgba(0, 212, 255, 0.1);
+}
+
+.chat-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.chat-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
