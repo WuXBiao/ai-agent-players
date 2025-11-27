@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package roleplay;
+
+option go_package = "serve-go/internal/grpc";
+
+// 角色扮演服务
+service RolePlayService {
+  // 设置角色
+  rpc SetRole (SetRoleRequest) returns (SetRoleResponse);
+  
+  // 与角色对话
+  rpc ChatWithRole (ChatRequest) returns (ChatResponse);
+  
+  // 重置对话
+  rpc ResetConversation (ResetRequest) returns (ResetResponse);
+  
+  // 获取预设角色列表
+  rpc GetPresetRoles (GetPresetRolesRequest) returns (GetPresetRolesResponse);
+}
+
+// 设置角色请求
+message SetRoleRequest {
+  string role_name = 1;
+  string custom_name = 2;
+  string custom_prompt = 3;
+  string custom_greeting = 4;
+}
+
+// 设置角色响应
+message SetRoleResponse {
+  bool success = 1;
+  string message = 2;
+  string greeting = 3;
+}
+
+// 对话请求
+message ChatRequest {
+  string message = 1;
+}
+
+// 对话响应
+message ChatResponse {
+  bool success = 1;
+  string response = 2;
+  string error = 3;
+}
+
+// 重置请求
+message ResetRequest {}
+
+// 重置响应
+message ResetResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取预设角色请求
+message GetPresetRolesRequest {}
+
+// 预设角色信息
+message PresetRole {
+  string name = 1;
+  string description = 2;
+  string emoji = 3;
+}
+
+// 获取预设角色响应
+message GetPresetRolesResponse {
+  repeated PresetRole roles = 1;
+}

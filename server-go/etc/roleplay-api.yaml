@@ -1,0 +1,21 @@
+Name: ai-role-play-app-go-server
+Host: 0.0.0.0
+Port: 8080
+Timeout: 30000
+
+Log:
+  Mode: console
+  Level: info
+
+# 数据库配置
+DataSource:
+  Host: "localhost"
+  Port: 3306
+  Database: "roleplay"
+  Username: "root"
+  Password: "${DB_PASSWORD}"  # 从环境变量读取
+
+# gRPC服务配置
+GrpcService:
+  Address: "localhost:50051"
+  Timeout: 30000
