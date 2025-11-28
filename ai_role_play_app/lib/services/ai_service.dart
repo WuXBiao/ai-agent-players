@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/role.dart';
@@ -11,16 +12,21 @@ class AIService {
 
   // 获取API密钥
   static String? _getApiKey(String provider) {
-    switch (provider) {
-      case 'openai':
-        return dotenv.env['OPENAI_API_KEY'];
-      case 'zhipu':
-        return dotenv.env['ZHIPU_API_KEY'];
-      case 'siliconflow':
-        return dotenv.env['SILICONFLOW_API_KEY'];
-      default:
-        return null;
+    final apiKey = switch (provider) {
+      'openai' => dotenv.env['OPENAI_API_KEY'],
+      'zhipu' => dotenv.env['ZHIPU_API_KEY'],
+      'siliconflow' => dotenv.env['SILICONFLOW_API_KEY'],
+      _ => null,
+    };
+    
+    if (apiKey != null && apiKey.isNotEmpty) {
+      debugPrint('✅ API Key found for provider: $provider');
+    } else {
+      debugPrint('❌ API Key NOT found for provider: $provider');
+      debugPrint('Available env keys: ${dotenv.env.keys.toList()}');
     }
+    
+    return apiKey;
   }
 
   // 构建消息历史
@@ -46,9 +52,12 @@ class AIService {
 
   // 发送请求到AI
   static Future<String> sendMessage(Role role, List<Message> history, String userMessage, {String provider = 'siliconflow'}) async {
+    debugPrint('📤 Sending message to AI provider: $provider');
+    
     final apiKey = _getApiKey(provider);
     if (apiKey == null || apiKey.isEmpty) {
-      throw Exception('API密钥未配置');
+      debugPrint('❌ Error: API Key is missing for provider: $provider');
+      throw Exception('API密钥未配置: $provider');
     }
 
     final url = _getUrl(provider);
@@ -57,19 +66,27 @@ class AIService {
     final body = _buildRequestBody(provider, messages);
 
     try {
+      debugPrint('📡 Making request to: $url');
       final response = await http.post(
         Uri.parse(url),
         headers: headers,
         body: jsonEncode(body),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw Exception('请求超时'),
       );
 
       if (response.statusCode == 200) {
+        debugPrint('✅ Response received successfully');
         final data = jsonDecode(response.body);
         return _extractResponseContent(data, provider);
       } else {
+        debugPrint('❌ API Error: ${response.statusCode}');
+        debugPrint('Response body: ${response.body}');
         throw Exception('API请求失败: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      debugPrint('❌ Network error: $e');
       throw Exception('网络请求错误: $e');
     }
   }

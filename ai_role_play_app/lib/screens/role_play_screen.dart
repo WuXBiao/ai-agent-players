@@ -5,6 +5,9 @@ import '../services/ai_service.dart';
 import '../widgets/role_selector.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/chat_input.dart';
+import '../widgets/animated_background.dart';
+import '../theme/color_theme.dart';
+import '../widgets/custom_emoji_icon.dart';
 
 class RolePlayScreen extends StatefulWidget {
   const RolePlayScreen({super.key});
@@ -14,6 +17,33 @@ class RolePlayScreen extends StatefulWidget {
 }
 
 class _RolePlayScreenState extends State<RolePlayScreen> {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // 自动滚动到底部
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   // 预设角色
   final List<Role> roles = [
     Role(
@@ -98,6 +128,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
         timestamp: DateTime.now(),
       ));
     });
+    _scrollToBottom();
   }
 
   // 发送消息
@@ -131,6 +162,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
           timestamp: DateTime.now(),
         ));
       });
+      _scrollToBottom();
     } catch (e) {
       setState(() {
         messages.add(Message(
@@ -140,6 +172,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
           timestamp: DateTime.now(),
         ));
       });
+      _scrollToBottom();
     } finally {
       setState(() {
         _isSending = false;
@@ -172,69 +205,255 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AI角色扮演'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _resetConversation,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: ColorTheme.appBarGradient,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF6B6B).withOpacity(0.25),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: _clearChat,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 角色选择器
-          RoleSelector(
-            roles: roles,
-            selectedRole: selectedRole,
-            onRoleSelected: _selectRole,
-          ),
-          // 分割线
-          const Divider(height: 1),
-          // 聊天区域
-          Expanded(
-            child: messages.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.chat_bubble_outline,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '选择一个角色开始对话',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+          child: AppBar(
+            title: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.2),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.4),
+                      width: 2,
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    reverse: false,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      return MessageBubble(message: messages[index]);
-                    },
                   ),
+                  child: const Center(
+                    child: EmojiIcon(
+                      emoji: '🎭',
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '虚拟角色',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      '与AI进行有趣的对话',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.7),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            centerTitle: false,
+            actions: [
+              // 更换角色按钮 - 选择角色后显示
+              if (selectedRole != null)
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.2),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          selectedRole = null;
+                          messages.clear();
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.swap_horiz,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              // 重置按钮
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.2),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _resetConversation,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.refresh,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // 清空按钮
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.2),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _clearChat,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          // 输入区域
-          ChatInput(
-            onSend: _sendMessage,
-            isSending: _isSending,
-          ),
-        ],
+        ),
+      ),
+      body: AnimatedBackground(
+        child: Column(
+          children: [
+            // 角色选择器 - 选择后隐藏
+            if (selectedRole == null)
+              Column(
+                children: [
+                  RoleSelector(
+                    roles: roles,
+                    selectedRole: selectedRole,
+                    onRoleSelected: _selectRole,
+                  ),
+                  // 分割线
+                  Divider(
+                    height: 1,
+                    color: Colors.grey.shade200,
+                  ),
+                ],
+              ),
+            // 聊天区域
+            Expanded(
+              child: messages.isEmpty
+                  ? Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  colors: ColorTheme.emptyStateGradient,
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 50,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Text(
+                                '选择一个角色开始对话',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[700],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Text(
+                                '与 AI 进行有趣的角色扮演对话',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      reverse: false,
+                      itemCount: messages.length,
+                      addRepaintBoundaries: true,
+                      addAutomaticKeepAlives: false,
+                      cacheExtent: 500,
+                      itemBuilder: (context, index) {
+                        return MessageBubble(
+                          message: messages[index],
+                          index: index,
+                        );
+                      },
+                    ),
+            ),
+            // 输入区域
+            ChatInput(
+              onSend: _sendMessage,
+              isSending: _isSending,
+            ),
+          ],
+        ),
       ),
     );
   }
