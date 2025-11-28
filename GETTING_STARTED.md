@@ -59,14 +59,27 @@ cp .env.example .env
 
 ### 步骤 3：启动所有服务
 
+⚠️ **重要**：启动顺序必须是 Python → Go → Vue
+
 #### 方式 A：使用脚本（推荐）
 
 **Windows:**
 ```bash
 # 创建 start-all.bat
 @echo off
-start "Go Server" cmd /k "cd server-go && go run main.go"
+REM 1. 先启动 Python gRPC 服务
 start "Python Server" cmd /k "cd server-python && python grpc/server.py"
+
+REM 等待 Python 服务启动
+timeout /t 3
+
+REM 2. 再启动 Go 服务
+start "Go Server" cmd /k "cd server-go && go run main.go"
+
+REM 等待 Go 服务启动
+timeout /t 2
+
+REM 3. 最后启动 Vue 前端
 start "Vue Frontend" cmd /k "cd role-play-vue && npm install && npm run dev"
 ```
 
@@ -74,25 +87,35 @@ start "Vue Frontend" cmd /k "cd role-play-vue && npm install && npm run dev"
 ```bash
 # 创建 start-all.sh
 #!/bin/bash
-cd server-go && go run main.go &
-cd ../server-python && python grpc/server.py &
+
+# 1. 先启动 Python gRPC 服务
+cd server-python && python grpc/server.py &
+sleep 3
+
+# 2. 再启动 Go 服务
+cd ../server-go && go run main.go &
+sleep 2
+
+# 3. 最后启动 Vue 前端
 cd ../role-play-vue && npm install && npm run dev &
 ```
 
-#### 方式 B：手动启动
+#### 方式 B：手动启动（推荐用这个方式）
 
-**终端 1 - Go 服务：**
-```bash
-cd server-go
-go mod tidy
-go run main.go
-```
-
-**终端 2 - Python 服务：**
+**终端 1 - Python gRPC 服务（必须先启动！）：**
 ```bash
 cd server-python
 pip install -r requirements.txt
 python grpc/server.py
+# 输出: gRPC server running on port 50051
+```
+
+**终端 2 - Go 后端服务：**
+```bash
+cd server-go
+go mod tidy
+go run main.go
+# 输出: Starting server at 0.0.0.0:8080...
 ```
 
 **终端 3 - Vue 前端：**
@@ -100,6 +123,7 @@ python grpc/server.py
 cd role-play-vue
 npm install
 npm run dev
+# 输出: Local: http://localhost:5173/
 ```
 
 ### 步骤 4：访问应用
@@ -261,28 +285,6 @@ cd ..
 ```bash
 cd role-play-vue
 npm install
-cd ..
-```
-
-### 7. 启动服务
-
-**终端 1 - Go 服务：**
-```bash
-cd server-go
-go run main.go
-# 输出: Starting server at 0.0.0.0:8080...
-```
-
-**终端 2 - Python 服务：**
-```bash
-cd server-python
-python grpc/server.py
-# 输出: gRPC server running on port 50051
-```
-
-**终端 3 - Vue 前端：**
-```bash
-cd role-play-vue
 npm run dev
 # 输出: Local: http://localhost:5173/
 ```
@@ -463,22 +465,31 @@ pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ## 快速命令参考
 
 ```bash
-# 启动所有服务
-cd server-go && go run main.go &
-cd ../server-python && python grpc/server.py &
+# ⚠️ 启动顺序很重要：Python → Go → Vue
+
+# 1. 启动 Python gRPC 服务（必须先启动！）
+cd server-python && python grpc/server.py &
+
+# 2. 启动 Go 后端服务
+cd ../server-go && go run main.go &
+
+# 3. 启动 Vue 前端
 cd ../role-play-vue && npm run dev &
 
 # 停止所有服务
 # Windows: Ctrl+C in each terminal
-# Linux/Mac: pkill -f "go run main.go" && pkill -f "python grpc/server.py"
+# Linux/Mac: pkill -f "python grpc/server.py" && pkill -f "go run main.go"
 
 # 查看日志
-tail -f server-go/logs/app.log
 tail -f server-python/logs/app.log
+tail -f server-go/logs/app.log
 
 # 测试 API
 curl http://localhost:8080/roles
 curl http://localhost:8080/roles/1
+
+# 测试 gRPC 连接
+cd server-python && python grpc/test_grpc_connection.py
 
 # 重新安装依赖
 go mod tidy

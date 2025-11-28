@@ -88,15 +88,12 @@ ai-role-play/
 │       └── styles/                 # 全局样式
 │           └── global.css          # 全局 CSS
 │
-├── 📁 app/                         # Android APP（Kivy）📱
-│   ├── main.py                     # APP 主程序
-│   ├── buildozer.spec              # Android 打包配置
-│   ├── requirements.txt            # Python 依赖
-│   ├── .env.example                # 环境变量模板
-│   └── README.md                   # APP 说明
-│
-└── 📁 ai_role_play_app/            # 其他资源
-    └── ...                         # 其他文件
+└── 📁 ai_role_play_app/            # Android APP（Kivy）📱
+    ├── main.py                     # APP 主程序
+    ├── buildozer.spec              # Android 打包配置
+    ├── requirements.txt            # Python 依赖
+    ├── .env.example                # 环境变量模板
+    └── README.md                   # APP 说明                         # 其他文件
 ```
 
 ---
@@ -193,7 +190,7 @@ AI 回复
 
 ---
 
-### 📱 app（Android APP）
+### 📱 ai_role_play_app（Android APP）
 
 **职责**：移动端应用
 
@@ -210,6 +207,22 @@ AI 回复
 - Python 3.9+
 
 ---
+
+## 启动顺序
+
+⚠️ **必须按以下顺序启动服务**：
+
+```
+1️⃣ Python gRPC 服务（localhost:50051）
+   ↓
+2️⃣ Go 后端服务（http://localhost:8080）
+   ↓
+3️⃣ Vue Web 前端（http://localhost:5173）
+```
+
+**为什么要这个顺序？**
+- Go 服务依赖 Python gRPC 服务，如果 Python 服务未启动，Go 服务会无法连接
+- Vue 前端调用 Go 服务的 API，需要 Go 服务已启动
 
 ## 数据流向
 
@@ -232,7 +245,7 @@ AI 回复
 │ 3. Go 服务执行业务逻辑                                       │
 │    (server-go/logic/sendmessagelogic.go)                    │
 └────────────────────┬────────────────────────────────────────┘
-                     │ gRPC 调用
+                     │ gRPC 调用（需要 Python 服务已启动！）
                      ↓
 ┌─────────────────────────────────────────────────────────────┐
 │ 4. Python 服务处理请求                                       │

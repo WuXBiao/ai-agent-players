@@ -96,20 +96,22 @@
 
 ### 一键启动（推荐）
 
+⚠️ **重要**：Python gRPC 服务必须先启动，Go 服务才能正常工作！
+
 ```bash
 # 1. 克隆项目
 git clone https://github.com/yourusername/ai-role-play.git
 cd ai-role-play
 
-# 2. 启动 Go 服务
-cd server-go
-go mod tidy
-go run main.go &
-
-# 3. 启动 Python 服务
-cd ../server-python
+# 2. 启动 Python gRPC 服务（必须先启动！）
+cd server-python
 pip install -r requirements.txt
 python grpc/server.py &
+
+# 3. 启动 Go 后端服务
+cd ../server-go
+go mod tidy
+go run main.go &
 
 # 4. 启动 Web 前端
 cd ../role-play-vue
@@ -119,19 +121,16 @@ npm run dev
 
 访问 `http://localhost:5173` 即可使用！
 
+**服务启动顺序很重要**：
+1. ✅ Python gRPC 服务（`localhost:50051`）- 必须先启动
+2. ✅ Go 后端服务（`http://localhost:8080`）- 依赖 Python 服务
+3. ✅ Vue Web 前端（`http://localhost:5173`）- 调用 Go 服务
+
 ### 分步启动
 
-#### 1️⃣ 启动 Go 后端服务
+⚠️ **启动顺序**：Python → Go → Vue
 
-```bash
-cd server-go
-go mod tidy
-go run main.go -f etc/roleplay-api.yaml
-```
-
-服务运行在 `http://localhost:8080`
-
-#### 2️⃣ 启动 Python AI 服务
+#### 1️⃣ 启动 Python gRPC 服务（必须先启动！）
 
 ```bash
 cd server-python
@@ -140,6 +139,16 @@ python grpc/server.py
 ```
 
 gRPC 服务运行在 `localhost:50051`
+
+#### 2️⃣ 启动 Go 后端服务
+
+```bash
+cd server-go
+go mod tidy
+go run main.go -f etc/roleplay-api.yaml
+```
+
+服务运行在 `http://localhost:8080`
 
 #### 3️⃣ 启动 Web 前端
 
@@ -215,11 +224,11 @@ ai-role-play/
 │   ├── vite.config.js
 │   └── 📄 README.md                # Vue 前端说明
 │
-├── 📁 app/                         # Android APP（Kivy）
-│   ├── main.py                     # APP 主程序
-│   ├── buildozer.spec              # Android 打包配置
-│   ├── requirements.txt            # 依赖
-│   └── 📄 README.md                # APP 说明
+├── 📁 app/                         # Android APP（Kivy）📱
+    ├── main.py                     # APP 主程序
+    ├── buildozer.spec              # Android 打包配置
+    ├── requirements.txt            # 依赖
+    └── 📄 README.md                # APP 说明
 │
 └── 📁 ai_role_play_app/            # 其他资源
 ```
@@ -235,7 +244,7 @@ ai-role-play/
 | **Go 后端** | REST API 网关，高性能服务 | Go + go-zero | [📖 详细说明](./server-go/README.md) |
 | **Python 服务** | AI 模型处理，gRPC 服务 | Python + gRPC | [📖 详细说明](./server-python/README.md) |
 | **Vue 前端** | Web 聊天界面，现代化 UI | Vue 3 + Vite | [📖 详细说明](./role-play-vue/README.md) |
-| **Android APP** | 原生移动应用 | Kivy + Python | [📖 详细说明](./app/README.md) |
+| **Android APP** | 原生移动应用 | Kivy + Python | [📖 详细说明](./ai_role_play_app/README.md) |
 
 ### 各模块详细说明
 
@@ -258,7 +267,7 @@ ai-role-play/
 - **特点**：响应式设计、现代化 UI、流畅动画
 - **页面**：首页、角色列表、聊天页面
 
-#### 📱 [Android APP](./app/README.md)
+#### 📱 [Android APP](./ai_role_play_app/README.md)
 - **职责**：移动端应用
 - **特点**：原生体验、离线支持、流畅界面
 - **打包**：支持 APK 生成
@@ -437,7 +446,7 @@ A: 参考 [APP 说明文档](./app/README.md#打包成-android-apk)
 
 ## 👨‍💻 作者
 
-- **项目创建者**：[Your Name]
+- **项目创建者**：[WuXBiao]
 - **贡献者**：欢迎加入！
 
 ---
