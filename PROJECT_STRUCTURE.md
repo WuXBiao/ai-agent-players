@@ -190,9 +190,15 @@ AI 回复
 
 ---
 
-### 📱 ai_role_play_app（Android APP）
+### 📱 ai_role_play_app（Android APP - 独立应用）
 
-**职责**：移动端应用
+**职责**：独立移动端应用，直接调用 AI API
+
+**特点**：
+- ✅ 独立运行，不依赖 Go/Python 后端服务
+- ✅ 直接调用 OpenAI、智谱 AI 等 LLM
+- ✅ 原生 Android 体验
+- ✅ 本地数据存储
 
 **关键文件**：
 
@@ -200,17 +206,21 @@ AI 回复
 |------|------|
 | `main.py` | APP 主程序 |
 | `buildozer.spec` | Android 打包配置 |
-| `requirements.txt` | 依赖 |
+| `requirements.txt` | Python 依赖 |
+| `.env.example` | 环境变量模板 |
 
 **技术栈**：
-- Kivy (跨平台 UI 框架)
+- Kivy (跨平台 Python UI 框架)
 - Python 3.9+
+- OpenAI/智谱 AI SDK (直接调用 AI API)
 
 ---
 
 ## 启动顺序
 
-⚠️ **必须按以下顺序启动服务**：
+### Web 前端启动顺序
+
+⚠️ **必须按以下顺序启动服务**（仅用于 Web 前端）：
 
 ```
 1️⃣ Python gRPC 服务（localhost:50051）
@@ -223,6 +233,15 @@ AI 回复
 **为什么要这个顺序？**
 - Go 服务依赖 Python gRPC 服务，如果 Python 服务未启动，Go 服务会无法连接
 - Vue 前端调用 Go 服务的 API，需要 Go 服务已启动
+
+### Android APP 启动
+
+✅ **Android APP 无需启动任何后端服务**
+
+- 不需要启动 Python gRPC 服务
+- 不需要启动 Go 后端服务
+- 只需配置 AI API Key（OpenAI、智谱 AI 等）
+- APP 直接调用 AI API
 
 ## 数据流向
 
