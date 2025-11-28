@@ -88,15 +88,12 @@ ai-role-play/
 │       └── styles/                 # 全局样式
 │           └── global.css          # 全局 CSS
 │
-├── 📁 app/                         # Android APP（Kivy）📱
-│   ├── main.py                     # APP 主程序
-│   ├── buildozer.spec              # Android 打包配置
-│   ├── requirements.txt            # Python 依赖
-│   ├── .env.example                # 环境变量模板
-│   └── README.md                   # APP 说明
-│
-└── 📁 ai_role_play_app/            # 其他资源
-    └── ...                         # 其他文件
+└── 📁 ai_role_play_app/            # Android APP（Kivy）📱
+    ├── main.py                     # APP 主程序
+    ├── buildozer.spec              # Android 打包配置
+    ├── requirements.txt            # Python 依赖
+    ├── .env.example                # 环境变量模板
+    └── README.md                   # APP 说明                         # 其他文件
 ```
 
 ---
@@ -193,7 +190,7 @@ AI 回复
 
 ---
 
-### 📱 app（Android APP）
+### 📱 ai_role_play_app（Android APP）
 
 **职责**：移动端应用
 

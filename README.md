@@ -215,11 +215,11 @@ ai-role-play/
 │   ├── vite.config.js
 │   └── 📄 README.md                # Vue 前端说明
 │
-├── 📁 app/                         # Android APP（Kivy）
-│   ├── main.py                     # APP 主程序
-│   ├── buildozer.spec              # Android 打包配置
-│   ├── requirements.txt            # 依赖
-│   └── 📄 README.md                # APP 说明
+├── 📁 app/                         # Android APP（Kivy）📱
+    ├── main.py                     # APP 主程序
+    ├── buildozer.spec              # Android 打包配置
+    ├── requirements.txt            # 依赖
+    └── 📄 README.md                # APP 说明
 │
 └── 📁 ai_role_play_app/            # 其他资源
 ```
@@ -235,7 +235,7 @@ ai-role-play/
 | **Go 后端** | REST API 网关，高性能服务 | Go + go-zero | [📖 详细说明](./server-go/README.md) |
 | **Python 服务** | AI 模型处理，gRPC 服务 | Python + gRPC | [📖 详细说明](./server-python/README.md) |
 | **Vue 前端** | Web 聊天界面，现代化 UI | Vue 3 + Vite | [📖 详细说明](./role-play-vue/README.md) |
-| **Android APP** | 原生移动应用 | Kivy + Python | [📖 详细说明](./app/README.md) |
+| **Android APP** | 原生移动应用 | Kivy + Python | [📖 详细说明](./ai_role_play_app/README.md) |
 
 ### 各模块详细说明
 
@@ -258,7 +258,7 @@ ai-role-play/
 - **特点**：响应式设计、现代化 UI、流畅动画
 - **页面**：首页、角色列表、聊天页面
 
-#### 📱 [Android APP](./app/README.md)
+#### 📱 [Android APP](./ai_role_play_app/README.md)
 - **职责**：移动端应用
 - **特点**：原生体验、离线支持、流畅界面
 - **打包**：支持 APK 生成
