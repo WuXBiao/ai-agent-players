@@ -4,29 +4,24 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/role.dart';
 import '../models/message.dart';
+import '../utils/api_key_manager.dart';
 
 class AIService {
   static const String _openaiBaseUrl = 'https://api.openai.com/v1/chat/completions';
   static const String _zhipuBaseUrl = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
   static const String _siliconflowBaseUrl = 'https://api.siliconflow.cn/v1/chat/completions';
 
-  // 获取API密钥
+  // 获取API密钥（从内存或 .env 获取）
   static String? _getApiKey(String provider) {
-    final apiKey = switch (provider) {
-      'openai' => dotenv.env['OPENAI_API_KEY'],
-      'zhipu' => dotenv.env['ZHIPU_API_KEY'],
-      'siliconflow' => dotenv.env['SILICONFLOW_API_KEY'],
-      _ => null,
-    };
+    final apiKey = APIKeyManager.getAPIKey(provider);
     
     if (apiKey != null && apiKey.isNotEmpty) {
       debugPrint('✅ API Key found for provider: $provider');
-    } else {
-      debugPrint('❌ API Key NOT found for provider: $provider');
-      debugPrint('Available env keys: ${dotenv.env.keys.toList()}');
+      return apiKey;
     }
     
-    return apiKey;
+    debugPrint('❌ API Key NOT found for provider: $provider');
+    return null;
   }
 
   // 构建消息历史

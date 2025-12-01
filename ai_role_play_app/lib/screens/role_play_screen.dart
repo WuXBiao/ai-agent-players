@@ -8,6 +8,7 @@ import '../widgets/chat_input.dart';
 import '../widgets/animated_background.dart';
 import '../theme/color_theme.dart';
 import '../widgets/custom_emoji_icon.dart';
+import 'api_key_setup_screen.dart';
 
 class RolePlayScreen extends StatefulWidget {
   const RolePlayScreen({super.key});
@@ -115,6 +116,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   Role? selectedRole;
   final List<Message> messages = [];
   bool _isSending = false;
+  String _selectedProvider = 'siliconflow'; // 默认提供商
 
   // 选择角色
   void _selectRole(Role role) {
@@ -152,6 +154,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
         selectedRole!,
         messages.where((m) => !m.isUser).toList(), // 只传递AI回复的历史
         text,
+        provider: _selectedProvider,
       );
 
       setState(() {
@@ -200,6 +203,37 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
     setState(() {
       messages.clear();
     });
+  }
+
+  // 构建提供商按钮
+  Widget _buildProviderButton(String provider, String label) {
+    final isSelected = _selectedProvider == provider;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedProvider = provider;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? Colors.blue.shade600 : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : Colors.grey.shade700,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -274,6 +308,36 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
             elevation: 0,
             centerTitle: false,
             actions: [
+              // API Key 设置按钮
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.2),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const APIKeySetupScreen(),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.vpn_key,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               // 更换角色按钮 - 选择角色后显示
               if (selectedRole != null)
                 Container(
@@ -371,6 +435,38 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
                     color: Colors.grey.shade200,
                   ),
                 ],
+              ),
+            // AI 提供商选择器 - 选择角色后显示
+            if (selectedRole != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: Colors.white.withOpacity(0.5),
+                child: Row(
+                  children: [
+                    const Text(
+                      'AI 提供商:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildProviderButton('siliconflow', '硅基流动'),
+                            const SizedBox(width: 8),
+                            _buildProviderButton('openai', 'OpenAI'),
+                            const SizedBox(width: 8),
+                            _buildProviderButton('zhipu', '智谱'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             // 聊天区域
             Expanded(

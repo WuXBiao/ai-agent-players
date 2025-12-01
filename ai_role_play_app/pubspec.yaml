@@ -13,6 +13,8 @@ dependencies:
   http: ^1.6.0
   flutter_dotenv: ^5.0.2
   animations: ^2.0.0
+  pointycastle: ^3.7.3
+  crypto: ^3.0.3
 
 dev_dependencies:
   flutter_test:

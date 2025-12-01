@@ -48,3 +48,4 @@ yarn-error.log*
 pnpm-debug.log*
 dist-ssr/
 *.local
+install_protoc.ps1
