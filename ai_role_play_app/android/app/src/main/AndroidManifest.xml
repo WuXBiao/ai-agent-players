@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 网络权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
     <application
-        android:label="ai_role_play"
+        android:label="虚拟角色聊天"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

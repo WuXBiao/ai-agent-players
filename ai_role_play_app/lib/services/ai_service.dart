@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/role.dart';
 import '../models/message.dart';
 import '../utils/api_key_manager.dart';
@@ -80,6 +80,9 @@ class AIService {
         debugPrint('Response body: ${response.body}');
         throw Exception('API请求失败: ${response.statusCode} - ${response.body}');
       }
+    } on SocketException catch (e) {
+      debugPrint('❌ Network error (SocketException): $e');
+      throw Exception('网络连接失败，请检查：\n1. 网络连接是否正常\n2. API 服务器是否可访问\n3. 是否需要代理或VPN\n\n错误详情: $e');
     } catch (e) {
       debugPrint('❌ Network error: $e');
       throw Exception('网络请求错误: $e');

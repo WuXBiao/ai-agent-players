@@ -66,17 +66,12 @@ void _checkApiKeys() {
           : entry.value!;
       debugPrint('✅ ${entry.key}: $masked');
     } else {
-      debugPrint('❌ ${entry.key}: NOT SET');
+      debugPrint('⚠️ ${entry.key}: NOT SET');
     }
   }
   
-  // 检查是否至少有一个 API Key
-  final hasAnyKey = keys.values.any((v) => v != null && v.isNotEmpty);
-  if (hasAnyKey) {
-    debugPrint('✅ At least one API Key is configured');
-  } else {
-    debugPrint('⚠️ No API Keys found! Please configure .env file');
-  }
+  debugPrint('📝 提示：应用完全依赖用户输入的 API Key');
+  debugPrint('📝 请在应用启动后点击钥匙图标输入 API Key');
 }
 
 class MyApp extends StatelessWidget {
@@ -85,7 +80,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '虚拟角色',
+      title: '虚拟角色聊天',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(

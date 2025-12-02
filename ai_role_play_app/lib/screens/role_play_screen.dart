@@ -167,10 +167,11 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       });
       _scrollToBottom();
     } catch (e) {
+      final errorMessage = e.toString().replaceFirst('Exception: ', '');
       setState(() {
         messages.add(Message(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: '抱歉，我遇到了一些问题：$e',
+          text: '❌ 错误：$errorMessage',
           isUser: false,
           timestamp: DateTime.now(),
         ));

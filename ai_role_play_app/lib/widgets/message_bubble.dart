@@ -140,7 +140,7 @@ class _MessageBubbleState extends State<MessageBubble>
                       ),
                     ],
                   ),
-                  child: Text(
+                  child: SelectableText(
                     widget.message.text,
                     style: TextStyle(
                       fontSize: 15,
